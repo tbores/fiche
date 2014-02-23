@@ -1,8 +1,17 @@
-#!/usr/bin/python3.4
+#!/usr/bin/python3.3
+# -*- coding: utf-8 -*-
 
 import os
 import hashlib
 import sys
+import argparse
+import xlsxwriter
+
+# Constants
+VERSION = 'v1.1'
+
+# Global 
+global_args = None # Program's command line arguments
 
 def md5sum(file_path, block_size=1024):
     md5 = hashlib.md5()
@@ -27,6 +36,18 @@ def save_hashlist(filename, hashlist):
         f.close()
     except IOError:
         print('IOError: '+filename)
+
+def save_as_excel(filename, list_of_hashlists):
+    workbook = xlsxwriter.Workbook(filename)
+
+    for name, hashlist in list_of_hashlists:
+        worksheet = workbook.add_worksheet(name)
+        row = 0
+        for line in hashlist:
+            for i in range(0, len(line)):
+                worksheet.write(row, i, line[i])
+                worksheet.write(row, i, line[i])
+            row += 1
 
 def handle_directory(directory_path):
     files_hashes = list()
@@ -83,10 +104,29 @@ def main(left_directory, right_directory):
     # Compare
     save_hashlist("left_only.csv", cmp_hashlist(left_hashlist, right_hashlist))
     save_hashlist("right_only.csv", cmp_hashlist(right_hashlist, left_hashlist))
+    
+    if global_args.xlsx is not None:
+        print('Writing results in '+global_args.xlsx)
+        save_as_excel(global_args.xlsx,
+                        [('left', left_hashlist),
+                        ('left_duplicates', left_duplicates),
+                        ('right', right_hashlist),
+                        ('right_duplicates', right_duplicates)])
 
 if __name__ == "__main__":
-    if len(sys.argv) < 3:
-        print("Usage: %s <left_directory_path> <right_directory_path>"%sys.argv[0])
-    else:
-        main(sys.argv[1], sys.argv[2])
-
+    
+    parser = argparse.ArgumentParser(prog='fiche',
+                                     description='Compare two directories')
+    parser.add_argument('left_directory',
+                        help='Left (source) directory',
+                        action='store')
+    parser.add_argument('right_directory',
+                        help='Right (target) directory',
+                        action='store')
+    parser.add_argument('--xlsx', nargs='?', help='Generate an Excel file that\
+                         contain the results')
+    global_args = parser.parse_args()
+    print('Welcome to fiche '+VERSION)
+    print('Thanks for using it!')
+    print('Coded by Thomas Bores')
+    main(global_args.left_directory, global_args.right_directory)
