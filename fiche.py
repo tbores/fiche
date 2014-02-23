@@ -38,16 +38,17 @@ def save_hashlist(filename, hashlist):
         print('IOError: '+filename)
 
 def save_as_excel(filename, list_of_hashlists):
+    if not filename.endswith('.xlsx'):
+        filename += '.xlsx'
+
     workbook = xlsxwriter.Workbook(filename)
 
     for name, hashlist in list_of_hashlists:
         worksheet = workbook.add_worksheet(name)
-        row = 0
-        for line in hashlist:
+        for row, line in enumerate(hashlist):
             for i in range(0, len(line)):
                 worksheet.write(row, i, line[i])
                 worksheet.write(row, i, line[i])
-            row += 1
 
 def handle_directory(directory_path):
     files_hashes = list()
