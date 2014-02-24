@@ -6,9 +6,10 @@ import hashlib
 import sys
 import argparse
 import xlsxwriter
+import csv
 
 # Constants
-VERSION = 'v1.1'
+VERSION = 'v1.2'
 
 # Global 
 global_args = None # Program's command line arguments
@@ -28,11 +29,10 @@ def md5sum(file_path, block_size=1024):
 
 def save_hashlist(filename, hashlist):
     try:
-        f = open(filename, 'w')
+        f = open(filename, 'w', newline='')
+        writer = csv.writer(f, delimiter=',')
         for line in hashlist:
-            for el in line:
-                f.write(el+',')
-            f.write('\r\n')
+            writer.writerow(line)
         f.close()
     except IOError:
         print('IOError: '+filename)
