@@ -137,19 +137,26 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(prog='fiche',
                                      description='Compare two directories')
     parser.add_argument('left_directory',
+                        nargs=1,
                         help='Left (source) directory',
-                        action='store')
+                        )
     parser.add_argument('right_directory',
+                        nargs='?',
                         help='Right (target) directory',
-                        action='store')
-    parser.add_argument('--xlsx', nargs='?', help='Generate an Excel file that\
-                         contains the results')
-    parser.add_argument('--duplicates', nargs='?', help='Find duplicated files\
-                         on both sides. Produce two lists: left_duplicates and\
-                         and right_duplicates')
-    parser.add_argument('--ignore', nargs='*', help='Regular expression that\
-                         contains the files that will be ignored during the\
-                         analyze')
+                        )
+    parser.add_argument('--xlsx',
+                        nargs='?', 
+                        help='Generate an Excel file that contains the results')
+    parser.add_argument('--duplicates', 
+                        nargs='?',
+                        help='Find duplicated files on both sides.\
+                        Produce two lists: left_duplicates and\
+                         right_duplicates')
+    parser.add_argument('--ignore',
+                        nargs='*',
+                        help='Regular expression that contains the files \
+                        that will be ignored during the \
+                        analyze')
     global_args = parser.parse_args()
     print('Welcome to fiche '+VERSION)
     print('Thanks for using it!')
