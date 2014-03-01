@@ -11,6 +11,11 @@ Calculate md5sum of all files in a directory:
 python3 fiche.py path/to/directory
 ```
 
+Exclude .txt and .png files from the analysis:
+```
+python3 fiche.py --ignore *.txt *.png path/to/directory
+```
+
 Find duplicated files in a directorory:
 
 ```
