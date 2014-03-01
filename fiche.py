@@ -7,9 +7,10 @@ import sys
 import argparse
 import xlsxwriter
 import csv
+import fnmatch 
 
 # Constants
-VERSION = 'v1.3'
+VERSION = 'v2.0'
 
 # Global 
 global_args = None # Program's command line arguments
@@ -39,7 +40,7 @@ def save_as_csv(list_of_hashlists):
     for name, hashlist in list_of_hashlists:
         if hashlist is not None:
             try:
-                f = open(name+'csv', 'w', newline='')
+                f = open(name+'.csv', 'w', newline='')
                 print('Writing results in '+name+'.csv')
                 writer = csv.writer(f, delimiter=',')
                 for line in hashlist:
@@ -64,6 +65,13 @@ def save_as_excel(filename, list_of_hashlists):
                     worksheet.write(row, i, line[i])
                     worksheet.write(row, i, line[i])
 
+def is_file_ignored(file):
+    if global_args.ignore is not None:
+       for el in global_args.ignore:
+           if fnmatch.fnmatch(file, el):
+                return True
+    return False
+
 def handle_directory(directory_path):
     files_hashes = list()
     files_duplicates = None
@@ -78,10 +86,13 @@ def handle_directory(directory_path):
             print("\t- %d files"%num_files)
             print("\t- %d directories"%num_dirs)
             for file in files:
-                if root.endswith('/') or root.endswith('\\'):
-                    handle_file(files_hashes, files_duplicates, str(root+file))
+                if is_file_ignored(file) == False:
+                   if root.endswith('/') or root.endswith('\\'):
+                        handle_file(files_hashes, files_duplicates, str(root+file))
+                   else:
+                        handle_file(files_hashes, files_duplicates, str(root+'/'+file))
                 else:
-                    handle_file(files_hashes, files_duplicates, str(root+'/'+file))
+                    print('Ignore file '+file)
     else:
         print("\"%s\" is not a directory!"%(directory_path))
     return files_hashes, files_duplicates
@@ -117,17 +128,23 @@ def main(left_directory, right_directory):
     left_hashlist,left_duplicates = handle_directory(left_directory)
     list_of_hashlist.append(( 'left', left_hashlist))
     list_of_hashlist.append(('left_duplicates', left_duplicates))
+    
+    if global_args.right_directory is not None:
+        # Handle right
+        right_hashlist, right_duplicates = handle_directory(right_directory)
+        list_of_hashlist.append(('right', right_hashlist))
+        list_of_hashlist.append(('right_duplicates', right_duplicates))
 
-    # Handle right
-    right_hashlist, right_duplicates = handle_directory(right_directory)
-    list_of_hashlist.append(('right', right_hashlist))
-    list_of_hashlist.append(('right_duplicates', right_duplicates))
-
-    # Compare
-    list_of_hashlist.append(('left_only', 
-                            cmp_hashlist(left_hashlist, right_hashlist)))
-    list_of_hashlist.append(('right_only',
-                            cmp_hashlist(right_hashlist, left_hashlist)))
+        # Compare
+        list_of_hashlist.append(('left_only', 
+                                cmp_hashlist(left_hashlist, right_hashlist)))
+        list_of_hashlist.append(('right_only',
+                                cmp_hashlist(right_hashlist, left_hashlist)))
+    
+    # Display results
+    print('%d duplicated file(s) found in left_directory!'%(len(left_duplicates)))
+    if global_args.right_directory is not None:
+        print('%d duplicated file(s) found in right_directory!'%(len(right_duplicates)))
     
     # Write results
     save(list_of_hashlist)
@@ -137,22 +154,21 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(prog='fiche',
                                      description='Compare two directories')
     parser.add_argument('left_directory',
-                        nargs=1,
                         help='Left (source) directory',
                         )
     parser.add_argument('right_directory',
                         nargs='?',
                         help='Right (target) directory',
                         )
-    parser.add_argument('--xlsx',
+    parser.add_argument('-x', '--xlsx',
                         nargs='?', 
                         help='Generate an Excel file that contains the results')
-    parser.add_argument('--duplicates', 
-                        nargs='?',
+    parser.add_argument('-d','--duplicates',
+                        action='store_true',
                         help='Find duplicated files on both sides.\
                         Produce two lists: left_duplicates and\
                          right_duplicates')
-    parser.add_argument('--ignore',
+    parser.add_argument('-i','--ignore',
                         nargs='*',
                         help='Regular expression that contains the files \
                         that will be ignored during the \
