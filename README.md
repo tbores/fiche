@@ -3,7 +3,7 @@ fiche
 
 Directory comparison tools. Fiche uses hashes based comparison.
 
-Dependancies:
+Dependencies:
 -------------
 xlsxwriter => https://xlsxwriter.readthedocs.org/
 
