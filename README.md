@@ -3,6 +3,26 @@ fiche
 
 Directory comparison tools. Fiche uses hashes based comparison.
 
+Dependancies:
+-------------
+xlsxwriter => https://xlsxwriter.readthedocs.org/
+
+Installation on Debian:
+-----------------------
+First install all the needed packages
+```
+sudo apt-get update
+sudo apt-get install python3 python3-pip python3-setuptools
+sudo pip3 install xlsxwriter
+```
+
+Download fiche and unzip it
+```
+wget https://github.com/tbores/fiche/archive/master.zip
+unzip master.zip
+```
+
+
 Usage examples:
 ---------------
 Calculate md5sum of all files in a directory:
